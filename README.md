@@ -1,2 +1,81 @@
 # BUAA-ElasticMechanics-MembraneAnalogyTwist
-This repository hosts MATLAB scripts for the Elastic Mechanics major project at Beihang University , titled 'Membrane Analogy Analysis of Cylindrical Torsion Experiment.' These scripts are developed for the detailed study using the membrane analogy method. 
+
+这个仓库托管了北京航空航天大学弹性力学课程大作业，题为“**薄膜比拟试验探究**”的 MATLAB 脚本。由2021级本科生**张添翼**制作。同时感谢**孙铁 张汉琛 李凯乐 王鸿鹏**四位同组成员，指导老师**毛建兴**老师。
+
+---
+
+## 脚本功能概述
+
+1. **Preprocess.m**：该脚本主要用于图像的预处理，包括读取图像、转换为灰度图、调整对比度和亮度、应用滤波器以及裁剪图像。
+2. **Contours.m**：这个脚本用于边缘检测和提取图像的曲线轮廓。它使用了Canny算法来检测边缘，并选择合适的轮廓进行展示。
+3. **Transform.m**：这段脚本主要关注于从图像中提取实际的数据点，并将图像坐标转换为实际坐标。它还包括对数据的一些初步处理。
+4. **Analyze.m**：此脚本专注于对提取的数据进行数学分析，包括评估导数、寻找最大和最小斜率的点以及划分斜率区间。
+
+## 安装与下载
+
+你需要进行以下步骤来使用 `BUAA-ElasticMechanics-MembraneAnalogyTwist`：
+
+1. 从 Github [Releases](https://github.com/Colorfulshadow/BUAA-ElasticMechanics-MembraneAnalogyTwist/releases) 下载zip文件或者单独的文件，保存在一个目录文件中。
+2. 安装合适的MATLAB程序。
+3. 安装合适的任意PS程序（需要进行一定的绘图）。
+4. 运行本脚本。
+
+## 特点
+
+- 准确度高
+  - 本项目对照片进行预处理，保障轮廓更加清晰。
+  - 采用Canny 算法进行边缘检测，可靠性较高。
+
+- 方便快捷
+  - 本项目对于图片进行处理，人工计算量较小。
+  - 若使用坐标值，可以直接在脚本中处理成为实际数据
+  
+- 易于学习
+  - 本项目代码简单，结构清晰，利于使用者阅读修改以及学习相关知识。
+
+
+## 开发模式
+
+在部分更改正式进入主要脚本之前，它们将被添加到开发模式中。同样，如果你有兴趣加入我们的开发，请从不同分支向我们提交pr。[详情](https://github.com/Colorfulshadow/BUAA-ElasticMechanics-MembraneAnalogyTwist/tree/develop)
+
+## 用法
+
+1. **预处理**：首先对图片进行适当预处理，我们建议利用类似于`Photoshop`之类的图片编辑软件，使用`钢笔工具`（因为这会使你的曲线更加光滑，误差更小）将你薄膜的轮廓进行描边，使用旋转工具将你的照片放正（这一步在最终结果中的影响较为显著）。最后将你预处理的图片命名为一个恰当的名称，放入该脚本所在文件夹。同时修改`Preprocess.m`中的`img = imread('image.png');`路径。
+
+2. **运行`Preprocess.m`完成脚本预处理**：运行该脚本后，会提示让你裁剪图片，选好覆盖所有轮廓区域后，双击轮廓内部即完成裁剪。此时，目录下应该出现`cropped_image.png`
+
+3. **运行`Contours.m`提论轮廓，查找`k`**：运行后，观察哪一个边界最符合你的实验曲线，然后记下它的索引 `k`。为了便于分析，我已经添加了获取边界中心点，用于放置文本标签`k`的功能。你可以通过以下小技巧来快速找到`k`：
+
+   - 查找边界中心点：对于任意一个边界，其标签处于其`midPoint`附近，所以你可以查找这附近是否有对应的标签
+
+   - 通过`B` 数组来查找：一般来说，我们需要查找的轮廓中包含的数据是最多的，因此可以通过这个特性在数组中寻找。首先你可以去掉以下代码：
+     ````matlab
+     midPoint = round(mean(boundary, 1));
+     text(midPoint(2), midPoint(1), sprintf('%d', k), 'Color', 'yellow', 'FontSize', 12)
+     ````
+     这段代码的作用是添加文本标签，他可能会让你的电脑卡顿。
+     运行脚本后查看你需要轮廓的**最左侧点**和**最右侧点**的`x,y`的值，双击打开工作区的`B`数组，在里面找到含有**数据最多**的二维数组，查看是否与之前的`x,y`的值对应，若对应，则其序号则为你需要查找的`k`值。
+
+4. **获取坐标轴距离**：若你在记录数据时使用到了坐标纸，那你可以在图中标注出每一条线对应的`x`的坐标，同时你可以找到这条曲线中心点的坐标（一般是最低点）。对于每一条线的`x`坐标，你可以填入`Transform.m`文件中的`perx`中计算放大比例关系，其方法于高中物理课已经学习到（后三减前三）。中心点的坐标填入`x_delta`和`y_delta`。若你在记录数据是未使用坐标纸，请你根据实际偏移原点坐标轴。
+
+5. **运行`Transform.m`提取数据点并转化为实际坐标**：将`3`中获得的`k`值代替`selected_boundary = B{5}`中的`5`，然后运行。此时应获得合理的`x_real`和`y_real`值
+
+6. **利用`cftool`进行曲线模拟**：在matlab命令行中输入cftool，即可打开曲线拟合器。选择`x_real`和`y_real`值作为拟合数据，建议以傅里叶函数作为拟合函数进行拟合，可以选择多项傅里叶函数提高拟合准确度。
+
+7. **导出拟合曲线到工作区**：拟合完成后，导出拟合曲线到工作区，默认参数即可：
+
+   ```
+   将拟合保存到具有以下名称的MATLAB对象：fittedmodel
+   将拟合优度保存到具有以下名称的MATLAB结构体：goodness
+   将你和输出保存到具有以下名称的MATLAB结构体：output
+   ```
+
+8. **运行`Analyze.m`获取最终结果**：若前面步骤都没问题，则可以成功获得最后结果。按照所得结果绘制`k`的阶梯图像即可
+
+## FAQ
+
+请在Issue中提问[问题](https://github.com/Colorfulshadow/BUAA-ElasticMechanics-MembraneAnalogyTwist/issues)。
+
+## Contributing
+
+Welcome everyone.
